@@ -1,9 +1,9 @@
 key: implement-only
-version: 2.0.3
+version: 2.0.4
 description: Single-state variant of coding-worker; one implement pass per iteration, gated on the pinned contract.
 runtime: opencode
 profile: coder
-model: {tier: cheap, fallback_tier: standard}
+model: {tier: standard, fallback_tier: cheap}
 states:
   - name: implement
     prompt: prompts/implement.md

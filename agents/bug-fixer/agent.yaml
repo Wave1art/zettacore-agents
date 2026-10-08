@@ -1,5 +1,5 @@
 key: bug-fixer
-version: 2.0.3
+version: 2.0.4
 description: Diagnoses one defect from its brief and repro, fixes the cause with a regression test, gated on the pinned contract.
 runtime: opencode
 profile: coder

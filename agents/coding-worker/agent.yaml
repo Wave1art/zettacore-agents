@@ -1,9 +1,9 @@
 key: coding-worker
-version: 2.0.3
+version: 2.0.4
 description: Implements one phase of a feature through the five-state loop, gated on the pinned contract.
 runtime: opencode
 profile: coder
-model: {tier: cheap, fallback_tier: standard}
+model: {tier: standard, fallback_tier: cheap}
 states:
   - name: resolve
     prompt: prompts/resolve.md

@@ -1,9 +1,9 @@
 key: overseer
-version: 2.0.2
+version: 2.0.3
 description: Diagnoses a shift that stopped at an exit state and relaunches or repairs it within its authorities, else escalates to the inbox.
 runtime: llm-loop
 profile: gate
-model: {tier: cheap, fallback_tier: standard}
+model: {tier: standard, fallback_tier: cheap}
 states:
   - name: diagnose
     prompt: prompts/diagnose.md

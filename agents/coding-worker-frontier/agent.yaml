@@ -1,10 +1,9 @@
-key: coding-worker-attended
-version: 2.0.4
-description: coding-worker that asks the inbox before any permission prompt and waits for the answer.
+key: coding-worker-frontier
+version: 1.0.0
+description: coding-worker on the frontier tier for the hardest phases; the same five-state loop, gated on the pinned contract.
 runtime: opencode
 profile: coder
-interaction: attended
-model: {tier: standard, fallback_tier: cheap}
+model: {tier: frontier, fallback_tier: standard}
 states:
   - name: resolve
     prompt: prompts/resolve.md
