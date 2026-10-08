@@ -1,0 +1,17 @@
+key: implement-only-frontier
+version: 1.0.0
+description: implement-only on the frontier tier; one implement pass per iteration with the strongest model, gated on the pinned contract.
+runtime: opencode
+profile: coder
+model: {tier: frontier, fallback_tier: standard}
+states:
+  - name: implement
+    prompt: prompts/implement.md
+    time_budget: 60m
+    idle_timeout: 20m
+    max_attempts: 2
+remediation: true
+skills: [implement]
+permissions: {bash: {"*": allow, "rm -rf *": deny}, external_directory: allow}
+sandbox: {cpu: "1", memory: 2Gi, dockerd: true}
+timeouts: {idle: 20m, gate: 10m, bootstrap: 2m}
