@@ -1,0 +1,43 @@
+key: coding-worker
+version: 2.0.3
+description: Implements one phase of a feature through the five-state loop, gated on the pinned contract.
+runtime: opencode
+profile: coder
+model: {tier: cheap, fallback_tier: standard}
+states:
+  - name: resolve
+    prompt: prompts/resolve.md
+    time_budget: 10m
+    idle_timeout: 5m
+    max_attempts: 2
+  - name: implement
+    prompt: prompts/implement.md
+    time_budget: 45m
+    idle_timeout: 20m
+    max_attempts: 3
+    checks:
+      - {kind: predicate, name: checklist_exists}
+  - name: verify
+    prompt: prompts/verify.md
+    time_budget: 20m
+    idle_timeout: 10m
+    max_attempts: 2
+    checks:
+      - {kind: command, command: [bash, .zcore/verify.sh], timeout: 900}
+  - name: review
+    prompt: prompts/review.md
+    time_budget: 15m
+    idle_timeout: 10m
+    max_attempts: 2
+  - name: handoff
+    prompt: prompts/handoff.md
+    time_budget: 10m
+    idle_timeout: 5m
+    max_attempts: 2
+    checks:
+      - {kind: checklist}
+remediation: true
+skills: [implement]
+permissions: {bash: {"*": allow, "rm -rf *": deny}, external_directory: allow}
+sandbox: {cpu: "1", memory: 2Gi, dockerd: true}
+timeouts: {idle: 20m, gate: 10m, bootstrap: 2m}

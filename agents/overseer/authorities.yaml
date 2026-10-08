@@ -1,0 +1,7 @@
+# What the overseer may decide on its own (plan D6). Everything else escalates to the inbox.
+max_relaunches: 1
+allow_repair: true
+# Exit states and reasons that always go to a person.
+escalate_on:
+  - contract_integrity
+  - decision_timeout

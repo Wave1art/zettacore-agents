@@ -1,0 +1,401 @@
+{
+  "$defs": {
+    "ChecklistCheck": {
+      "description": "The agent's own checklist file has no unchecked item.",
+      "properties": {
+        "kind": {
+          "const": "checklist",
+          "default": "checklist",
+          "title": "Kind",
+          "type": "string"
+        },
+        "path": {
+          "default": "/workspace/repo/.zc/checklist.md",
+          "title": "Path",
+          "type": "string"
+        }
+      },
+      "title": "ChecklistCheck",
+      "type": "object"
+    },
+    "CommandCheck": {
+      "description": "A shell command that must exit 0 inside the sandbox (v1 defect #104: it runs in the\nrepository working directory).",
+      "properties": {
+        "command": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Command",
+          "type": "array"
+        },
+        "kind": {
+          "const": "command",
+          "default": "command",
+          "title": "Kind",
+          "type": "string"
+        },
+        "timeout": {
+          "default": 300,
+          "title": "Timeout",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "command"
+      ],
+      "title": "CommandCheck",
+      "type": "object"
+    },
+    "LlmReviewCheck": {
+      "description": "A reviewer's verdict; the runner arrives with the review workflow (Phase 4).",
+      "properties": {
+        "kind": {
+          "const": "llm_review",
+          "default": "llm_review",
+          "title": "Kind",
+          "type": "string"
+        },
+        "reviewer": {
+          "title": "Reviewer",
+          "type": "string"
+        }
+      },
+      "required": [
+        "reviewer"
+      ],
+      "title": "LlmReviewCheck",
+      "type": "object"
+    },
+    "ModelPolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "fallback_tier": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z0-9][a-z0-9._-]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fallback Tier"
+        },
+        "tier": {
+          "pattern": "^[a-z0-9][a-z0-9._-]*$",
+          "title": "Tier",
+          "type": "string"
+        }
+      },
+      "required": [
+        "tier"
+      ],
+      "title": "ModelPolicy",
+      "type": "object"
+    },
+    "Permissions": {
+      "additionalProperties": false,
+      "properties": {
+        "bash": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "enum": [
+                  "allow",
+                  "deny",
+                  "ask"
+                ],
+                "type": "string"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Bash"
+        },
+        "external_directory": {
+          "anyOf": [
+            {
+              "enum": [
+                "allow",
+                "deny",
+                "ask"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "External Directory"
+        }
+      },
+      "title": "Permissions",
+      "type": "object"
+    },
+    "PredicateCheck": {
+      "description": "A registered Python check over the workspace or the run.",
+      "properties": {
+        "kind": {
+          "const": "predicate",
+          "default": "predicate",
+          "title": "Kind",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "PredicateCheck",
+      "type": "object"
+    },
+    "Sandbox": {
+      "additionalProperties": false,
+      "properties": {
+        "cpu": {
+          "default": "2",
+          "pattern": "^\\d+(m)?$",
+          "title": "Cpu",
+          "type": "string"
+        },
+        "dockerd": {
+          "default": true,
+          "title": "Dockerd",
+          "type": "boolean"
+        },
+        "image": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Image"
+        },
+        "memory": {
+          "default": "4Gi",
+          "pattern": "^\\d+(Mi|Gi)$",
+          "title": "Memory",
+          "type": "string"
+        },
+        "runtime_class": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Runtime Class"
+        }
+      },
+      "title": "Sandbox",
+      "type": "object"
+    },
+    "StateDefinition": {
+      "additionalProperties": false,
+      "description": "One ``states:`` entry (\u00a716.1); becomes a ``StateInput``.",
+      "properties": {
+        "checks": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "checklist": "#/$defs/ChecklistCheck",
+                "command": "#/$defs/CommandCheck",
+                "llm_review": "#/$defs/LlmReviewCheck",
+                "predicate": "#/$defs/PredicateCheck"
+              },
+              "propertyName": "kind"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/CommandCheck"
+              },
+              {
+                "$ref": "#/$defs/PredicateCheck"
+              },
+              {
+                "$ref": "#/$defs/ChecklistCheck"
+              },
+              {
+                "$ref": "#/$defs/LlmReviewCheck"
+              }
+            ]
+          },
+          "title": "Checks",
+          "type": "array"
+        },
+        "idle_timeout": {
+          "default": "PT10M",
+          "pattern": "^\\d+[smh]$",
+          "title": "Idle Timeout",
+          "type": "string"
+        },
+        "max_attempts": {
+          "default": 3,
+          "minimum": 1,
+          "title": "Max Attempts",
+          "type": "integer"
+        },
+        "name": {
+          "pattern": "^[a-z][a-z0-9-]*$",
+          "title": "Name",
+          "type": "string"
+        },
+        "prompt": {
+          "title": "Prompt",
+          "type": "string"
+        },
+        "time_budget": {
+          "default": "PT30M",
+          "pattern": "^\\d+[smh]$",
+          "title": "Time Budget",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "prompt"
+      ],
+      "title": "StateDefinition",
+      "type": "object"
+    },
+    "Timeouts": {
+      "additionalProperties": false,
+      "properties": {
+        "bootstrap": {
+          "default": "PT2M",
+          "pattern": "^\\d+[smh]$",
+          "title": "Bootstrap",
+          "type": "string"
+        },
+        "decision": {
+          "default": "P1D",
+          "pattern": "^\\d+[smh]$",
+          "title": "Decision",
+          "type": "string"
+        },
+        "gate": {
+          "default": "PT10M",
+          "pattern": "^\\d+[smh]$",
+          "title": "Gate",
+          "type": "string"
+        },
+        "idle": {
+          "default": "PT20M",
+          "pattern": "^\\d+[smh]$",
+          "title": "Idle",
+          "type": "string"
+        }
+      },
+      "title": "Timeouts",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "description": {
+      "default": "",
+      "title": "Description",
+      "type": "string"
+    },
+    "interaction": {
+      "default": "unattended",
+      "enum": [
+        "attended",
+        "unattended"
+      ],
+      "title": "Interaction",
+      "type": "string"
+    },
+    "key": {
+      "pattern": "^[a-z][a-z0-9-]*$",
+      "title": "Key",
+      "type": "string"
+    },
+    "model": {
+      "$ref": "#/$defs/ModelPolicy"
+    },
+    "permissions": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Permissions"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "profile": {
+      "default": "coder",
+      "enum": [
+        "coder",
+        "gate"
+      ],
+      "title": "Profile",
+      "type": "string"
+    },
+    "remediation": {
+      "default": true,
+      "title": "Remediation",
+      "type": "boolean"
+    },
+    "runtime": {
+      "default": "opencode",
+      "enum": [
+        "opencode",
+        "llm-loop"
+      ],
+      "title": "Runtime",
+      "type": "string"
+    },
+    "sandbox": {
+      "$ref": "#/$defs/Sandbox"
+    },
+    "skills": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Skills",
+      "type": "array"
+    },
+    "states": {
+      "items": {
+        "$ref": "#/$defs/StateDefinition"
+      },
+      "minItems": 1,
+      "title": "States",
+      "type": "array"
+    },
+    "timeouts": {
+      "$ref": "#/$defs/Timeouts"
+    },
+    "version": {
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "title": "Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "key",
+    "version",
+    "states"
+  ],
+  "title": "AgentDefinition",
+  "type": "object"
+}

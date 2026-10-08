@@ -1,0 +1,20 @@
+key: reviewer
+version: 2.0.2
+description: Reviews a change on one axis (standards or spec) and records findings, a verdict comment and the review_verdict evidence.
+runtime: llm-loop
+profile: gate
+model: {tier: cheap, fallback_tier: standard}
+states:
+  - name: standards
+    prompt: prompts/standards.md
+    time_budget: 15m
+    idle_timeout: 5m
+    max_attempts: 1
+  - name: spec
+    prompt: prompts/spec.md
+    time_budget: 15m
+    idle_timeout: 5m
+    max_attempts: 1
+remediation: false
+sandbox: {cpu: "1", memory: 1Gi, dockerd: false}
+timeouts: {idle: 10m, gate: 10m, bootstrap: 2m}
