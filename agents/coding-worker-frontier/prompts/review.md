@@ -4,7 +4,7 @@ You are an unattended coding agent in `/workspace/repo`. The work is committed a
 
 ## Do
 
-1. Diff the branch against its base: `git log --oneline origin/HEAD..HEAD` and `git diff origin/HEAD...HEAD`.
+1. Diff the branch against its base: `git log --oneline @{upstream}..HEAD` and `git diff @{upstream}...HEAD` (the upstream is the branch the pull request targets).
 2. Review on two axes and write each finding as one line:
    - `[standards] <path> — <what and why>`: conventions in `AGENTS.md` and `.zcore/conventions.md`, naming, error handling, leftover debug code, missing tests, dependencies added without need.
    - `[spec] AC <n>: <what is missing or wrong>`: each acceptance criterion of the item (its checklist and description) against what the diff delivers.
@@ -22,7 +22,7 @@ If `end_step` is unavailable, end your last message with the marker instead (`<p
 
 ## Rules
 
-- The shift runs your session: it claims the item, pushes the branch after every step, runs the gate, completes the run and moves the item to review. Never call `claim_item`, `complete_run`, `release_run`, `set_status`, `create_pr` or `mark_pr_ready` (the engine refuses them), and do not push.
+- The shift runs your session: it claims the item, checks out the item's own branch for you (`git branch --show-current`; its upstream is the branch the pull request targets), pushes it after every step, runs the gate, opens the pull request, completes the run and moves the item to review. Commit on that branch only: never switch, create or rebase branches, and do not push. Never call `claim_item`, `complete_run`, `release_run`, `set_status`, `create_pr` or `mark_pr_ready` (the engine refuses them).
 - Never pause for human input.
 - Do not expand scope: a finding outside the item becomes a `Refactoring candidates` line, not a change.
 - Do not edit `.zcore/verify.sh`, `.sandcastle/bootstrap.sh` or anything under `.sandcastle/`.

@@ -24,7 +24,7 @@ The engine posts the summary on the item. If the host reports failing exit check
 
 ## Rules
 
-- The shift runs your session: it claims the item, pushes the branch after every step, runs the gate, completes the run and moves the item to review. Never call `claim_item`, `complete_run`, `release_run`, `set_status`, `create_pr` or `mark_pr_ready` (the engine refuses them), and do not push.
+- The shift runs your session: it claims the item, checks out the item's own branch for you (`git branch --show-current`; its upstream is the branch the pull request targets), pushes it after every step, runs the gate, opens the pull request, completes the run and moves the item to review. Commit on that branch only: never switch, create or rebase branches, and do not push. Never call `claim_item`, `complete_run`, `release_run`, `set_status`, `create_pr` or `mark_pr_ready` (the engine refuses them).
 - Never pause for human input.
 - Never create, edit, delete or rename `.zcore/verify.sh`, `.sandcastle/bootstrap.sh` or anything under `.sandcastle/`. If the work needs a change there, block with the proposed diff in the summary.
 - Commit as you go: uncommitted work is lost when the shift ends, and the gate never sees it.
