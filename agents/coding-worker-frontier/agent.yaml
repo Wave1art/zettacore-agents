@@ -1,5 +1,6 @@
 key: coding-worker-frontier
-version: 1.0.0
+version: 1.1.0
+requires_engine: ">=2.0.0-rc.10"
 description: coding-worker on the frontier tier for the hardest phases; the same five-state loop, gated on the pinned contract.
 runtime: opencode
 profile: coder

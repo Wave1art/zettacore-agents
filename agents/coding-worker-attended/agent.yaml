@@ -1,5 +1,6 @@
 key: coding-worker-attended
-version: 2.0.4
+version: 2.1.0
+requires_engine: ">=2.0.0-rc.10"
 description: coding-worker that asks the inbox before any permission prompt and waits for the answer.
 runtime: opencode
 profile: coder

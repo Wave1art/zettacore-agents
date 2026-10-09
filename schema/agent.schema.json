@@ -355,6 +355,18 @@
       "title": "Remediation",
       "type": "boolean"
     },
+    "requires_engine": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Requires Engine"
+    },
     "runtime": {
       "default": "opencode",
       "enum": [

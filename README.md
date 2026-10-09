@@ -3,12 +3,16 @@
 The agent definitions that ship with [Zettacore](https://github.com/Wave1art/zettacore-combined):
 one directory per agent under `agents/`, each holding `agent.yaml`, its state prompts and, for the
 overseer, its authority table. A Zettacore install reads this repository as its **default agent
-source** (ADR 0003): the engine syncs the definitions from a pinned release tag, stores each one
-with its files, and the worker installs them into the sandbox at provision. Nothing here is built
+source** (ADR 0003): the engine syncs the definitions from the newest release tag it can run
+(`latest`, ADR 0011), stores each one with its files, and the worker installs them into the
+sandbox at provision. Nothing here is built
 into a Zettacore image; changing an agent is a commit here and a sync there.
 
-This repository has its own version (`v1.0.0` onwards, semver). A Zettacore release pins the tag
-it was tested with; the engine setting `AGENT_SOURCE_DEFAULT_REF` names it.
+This repository has its own version (`v1.0.0` onwards, semver) and releases without Zettacore.
+Each definition may declare `requires_engine` (a version range such as `">=2.0.0-rc.10"`): an
+engine outside the range does not register it, and a source following `latest` stays on the
+newest tag whose definitions all run on that engine. From `v1.3.0` the OpenCode definitions
+require Zettacore `2.0.0-rc.10` or later, the first engine with `end_step`.
 
 ## Layout
 
@@ -44,9 +48,25 @@ routes items to that queue or to the definition by name.
 | `reviewer` | Reviews a change on one axis per run: `standards` (correctness, tests, naming, structure, error handling, security) or `spec` (each acceptance criterion met or not). Records findings as `review` checklist entries, a `## Review verdict:` comment and the `review_verdict` evidence. | `llm-loop`, `gate` | `review` items (allocation `agent:reviewer`) on queue `shift-review`; a `ReviewWorkflow` clones for the diff and never pushes | `standard`, `cheap` | 1 CPU, 1 GiB, no dockerd; bounded LiteLLM calls, 15 m per axis, one attempt |
 | `overseer` | Supervises a shift that stopped at an exit state: `diagnose` names the cause and the action in one sentence; `repair` writes a brief of at most five lines for the corrective pass. Relaunches or repairs within `authorities.yaml` (one relaunch, repair allowed; `contract_integrity` and `decision_timeout` always escalate), else escalates to the inbox. | `llm-loop`, `gate` | Started by `ShiftWorkflow` on queue `shift-oversight` when the project enables `overseer`; no item allocation | `standard`, `cheap` | 1 CPU, 1 GiB, no dockerd; 10 m per state, one attempt; a decision escalated to a person times out after 24 h |
 
-The four OpenCode definitions share `prompts/remediation.md` (one corrective pass after a red
-gate) and the permission map `bash: {"*": allow, "rm -rf *": deny}`. Every prompt stays under 400
-words. All of them run the default Zettacore sandbox image; none sets `sandbox.image`.
+The OpenCode definitions share `prompts/remediation.md` (one corrective pass after a red gate)
+and the permission map `bash: {"*": allow, "rm -rf *": deny}`. Every prompt stays around 400
+words.
+
+### How an OpenCode agent talks to its shift
+
+Every OpenCode prompt starts with `get_step` (where the shift is: this step and the next, how
+earlier steps ended, the handoff pointers) and ends the step with one `end_step` call:
+
+- `DONE`: this step's work is finished; the shift runs its exit checks and the next step.
+- `NO_MORE_TASKS`: the item's work is finished (the last step); the shift pushes, gates and
+  closes the item. The summary is the closing comment.
+- `BLOCKED`, `SETUP_ERROR`, `CONTEXT_ROT`: the agent cannot go on; the summary says what a person
+  must do and `root_cause` why. The engine posts the summary on the item.
+
+The worker reads the call from OpenCode's event stream and acts on it; the `<promise>` markers
+stay as the fallback when the tool is unavailable. The shift pushes the branch after every step,
+so the prompts ask the agent to commit as it goes and never to push. `reviewer` and `overseer`
+run bounded LiteLLM calls without the engine's MCP tools and keep their markers. All of them run the default Zettacore sandbox image; none sets `sandbox.image`.
 
 Per-agent evals are not part of this release; the definitions are validated against the schema
 and exercised by Zettacore's own journeys.
@@ -56,14 +76,18 @@ and exercised by Zettacore's own journeys.
 A fresh Zettacore install with no agent sources links this repository on the engine's first jobs
 tick: it creates the repository row for `AGENT_SOURCE_DEFAULT_URL`
 (`https://github.com/Wave1art/zettacore-agents`) in the root organisation, adds an agent source
-at `AGENT_SOURCE_DEFAULT_REF` (a release tag) with path `agents`, and syncs it. The repository is
+at `AGENT_SOURCE_DEFAULT_REF` (`latest` from Zettacore `2.0.0-rc.10`) with path `agents`, and
+syncs it. The repository is
 public, so the sync reads it anonymously; no GitHub token or credential is needed. Admin > Agents
 shows the source with one row per definition (`registered`, `unchanged` or `error`); Sync runs it
 again on demand, and the jobs process syncs every ten minutes.
 
-To follow a newer release, change the source's ref in Admin > Agents > sources (or
-`PATCH /api/v1/agent-sources/{id} {"ref": "v1.1.0"}`) and sync. Each synced change registers a new
-definition version; projects on the `latest` policy pick it up, pinned projects keep theirs.
+A source's ref is a branch (`main`), a tag (`v1.3.0`), `latest` (the newest release this engine
+can run) or a tag pattern (`v1.*`, the newest release it matches). Change it with Edit in Admin >
+Agents > Sources (or `PATCH /api/v1/agent-sources/{id} {"ref": "latest"}`); the source is read in
+full on the next sync. Each synced change registers a new definition version; projects on the
+`latest` policy pick it up, pinned projects keep theirs. An install created before `2.0.0-rc.10`
+keeps the tag it was linked at until its ref is edited.
 
 ## Forking and linking your own source
 

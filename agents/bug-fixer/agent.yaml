@@ -1,5 +1,6 @@
 key: bug-fixer
-version: 2.0.4
+version: 2.1.0
+requires_engine: ">=2.0.0-rc.10"
 description: Diagnoses one defect from its brief and repro, fixes the cause with a regression test, gated on the pinned contract.
 runtime: opencode
 profile: coder

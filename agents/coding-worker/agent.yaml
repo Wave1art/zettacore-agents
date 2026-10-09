@@ -1,5 +1,6 @@
 key: coding-worker
-version: 2.0.4
+version: 2.1.0
+requires_engine: ">=2.0.0-rc.10"
 description: Implements one phase of a feature through the five-state loop, gated on the pinned contract.
 runtime: opencode
 profile: coder
