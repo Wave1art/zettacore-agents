@@ -9,7 +9,7 @@ Working directory: the repository under `/workspace/repo`. The engine is reachab
 1. Call `get_step`: it names this step and the next, how earlier steps ended, and the handoff pointers a previous run left.
 2. Read `AGENTS.md`, `CONTEXT.md` and `.zcore/conventions.md` if they exist. Follow them for the whole shift.
 3. Call `get_item` on the item with `include=["checklists","relations","comments"]`. Read its parent feature (`get_item` on `parent_id`) for the spec.
-4. Confirm every item it depends on (`precedes` relations pointing at it) is done. If one is not, end the step `BLOCKED` naming it.
+4. Confirm every item it depends on (`precedes` relations pointing at it) is done, rejected or cancelled. If one is not, end the step `BLOCKED` naming it.
 5. Read the implementation checklist on the item. If it is empty, write one of three to eight entries with `create_checklist_item` (type `implementation`).
 6. Write `/workspace/repo/.zc/checklist.md`: one `- [ ]` line per checklist entry, in order, nothing else. This file is the host's record of your plan; the next state is refused if a file is edited before it exists.
 
