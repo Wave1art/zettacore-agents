@@ -39,7 +39,9 @@ Judge both against the diff, not the plan:
   `local`.
 
 Confirm each, or challenge it with the value you think is right, giving the reason either way.
-A challenge is also a `[spec]` finding, so a person changes the field.
+A challenge is also a `[spec]` finding, so a person changes the field. It starts exactly
+`[spec] reversibility: challenged` or `[spec] blast_radius: challenged`, then
+`— <planned> → <your value>: <reason>`.
 
 ## Findings
 
@@ -51,6 +53,7 @@ file references; never paste a diff:
 [spec] AC 2: partly met — src/x.ts:40 handles the empty case, no test for it
 [spec] Invariant 5: broken — src/runs.py:88 moves the run without an outbox row
 [spec] blast_radius: challenged — local → module: src/api.py:12 changes a shared response
+[spec] reversibility: challenged — two_way → one_way: migrations/0042.py drops the column
 ```
 
 With no findings, `findings` is an empty list; never write an entry saying so.
