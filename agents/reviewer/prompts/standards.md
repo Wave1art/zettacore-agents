@@ -9,7 +9,8 @@ the phase asks. You report problems; you fix nothing.
 - The project's rules, read at the base: `.zcore/conventions.md`, `.zcore/lessons.md`, every
   file under `.zcore/code_styleguides/` and `CONTEXT.md`. Any of them may be absent. A project
   with no style guides has none to hold the diff to; never invent one.
-- The implementer's `### Refactoring candidates` comment, when there is one.
+- The implementer's refactoring candidates, when it listed any (a `### Refactoring candidates`
+  comment, or the `Refactoring candidates:` line of its `## Review` comment).
 
 ## Judge
 
@@ -26,8 +27,7 @@ For each file in the diff, ask:
 - Does it repeat code that already exists nearby, or put a responsibility in the wrong place?
 - Each refactoring candidate the implementer listed: is it still worth doing? Re-check it
   against the diff. Keep it as a finding only if you agree and the diff has not resolved it;
-  never copy the list across. A missing `### Refactoring candidates` comment is itself a
-  finding.
+  never copy the list across. With no candidates given there is nothing to re-check.
 
 Skip taste. A finding names the rule, convention, lesson, candidate or concrete cost it comes
 from; a preference that names none of them is not a finding.

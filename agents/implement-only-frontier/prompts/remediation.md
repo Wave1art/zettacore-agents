@@ -6,7 +6,7 @@ You are an unattended coding agent in `/workspace/repo`. The verification gate r
 
 1. Read the failure. `Gate failed at:` in `## Context` names the stage, `## Gate failure` holds the end of its log, and `Gate failure log:` gives the path of the whole log inside this sandbox (`/zc/gate/<iteration>/<attempt>-<stage>.log`): read it there. If it says only the end is available, work from `## Gate failure`; if it says there is none because the stage could not run, the failure is infrastructure, not your code: end the step `BLOCKED` as below.
 2. Identify the specific error. Fix the code or tests at the cause, not the symptom.
-3. Run `zc-verify` until it exits 0 (`zc-verify <stage>` runs one stage; start with the red one). It runs the pinned contract exactly as the gate does. A green `bash .zcore/verify.sh` is not proof: it runs this branch's copy in this workspace, which the gate never runs. Only if `zc-verify` is not installed (the shift has no contract pin), run `bash .zcore/verify.sh` and say so in your summary.
+3. Run `zc-verify` until it exits 0 (`zc-verify <stage>` runs one `verify.sh` stage, such as the one the log shows red). It runs the pinned contract exactly as the gate does. A green `bash .zcore/verify.sh` is not proof: it runs this branch's copy in this workspace, which the gate never runs. Only if `zc-verify` is not installed (the shift has no contract pin), run `bash .zcore/verify.sh` and say so in your summary.
 4. Commit the fix with `fix(<scope>): <what the gate rejected>`. The gate re-runs on the committed branch; uncommitted fixes do not exist as far as it is concerned.
 
 ## Ending this step
