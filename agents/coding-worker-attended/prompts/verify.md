@@ -4,11 +4,13 @@ You are an unattended coding agent in `/workspace/repo`. The implementation for 
 
 ## Do
 
-1. Run the full verification with no arguments:
+1. Run the full verification with no arguments, as the gate will:
 
    ```bash
-   bash .zcore/verify.sh
+   zc-verify
    ```
+
+   It runs the pinned contract exactly as the gate does (`zc-verify <stage>` runs one stage). `bash .zcore/verify.sh` runs this branch's copy, which the gate never runs: use it only when `zc-verify` is not installed (the shift has no contract pin), and say so in your summary.
 
 2. If it fails, fix the cause in the code or tests, commit the fix with `fix(<scope>): <what>`, and run it again. Repeat until it is green or you have run out of ideas.
 3. Do not weaken a test, skip a stage, add an exclusion or change thresholds to get to green. A test that is wrong gets fixed and the fix explained in the commit message.

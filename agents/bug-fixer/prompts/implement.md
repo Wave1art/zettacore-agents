@@ -12,7 +12,7 @@ Follow these in order. Do not skip ahead to a fix.
 4. **Hypothesise.** Rank two or three candidate causes, each with the observation that would rule it out. Instrument, run the red loop, discard what the evidence rules out.
 5. **Fix the cause**, not the symptom. Remove the instrumentation.
 6. **Regression test.** Keep the minimised check as a permanent test. It must fail without the fix and pass with it.
-7. Run `bash .zcore/verify.sh` with no arguments until it exits 0. Commit the fix and the test together as `fix(<scope>): <what>`.
+7. Run `zc-verify` with no arguments until it exits 0 (the pinned contract, exactly as the gate runs it; `bash .zcore/verify.sh` runs this branch's copy, which the gate never runs, so use it only when `zc-verify` is not installed). Commit the fix and the test together as `fix(<scope>): <what>`.
 
 ## Ending this step
 

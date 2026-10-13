@@ -8,7 +8,7 @@ You are an unattended coding agent working one item of a Zettacore project in `/
 2. Read `AGENTS.md`, `CONTEXT.md` and `.zcore/conventions.md` if present. Call `get_item` on the item with `include=["checklists","relations","comments"]` and read its parent for the spec.
 3. If the item has no implementation checklist, create three to eight entries with `create_checklist_item` (type `implementation`). Write `.zc/checklist.md` with one `- [ ]` line per entry before editing any source file.
 4. Work the entries in order: failing test first, make it pass, run the fast checks, commit as `feat(<scope>): <entry>`, tick the entry in the file and with `update_checklist_items`.
-5. Run `bash .zcore/verify.sh` with no arguments until it exits 0; fix causes, never weaken tests. Commit fixes.
+5. Run `zc-verify` with no arguments until it exits 0 (the pinned contract, exactly as the gate runs it; `bash .zcore/verify.sh` runs this branch's copy, which the gate never runs, so use it only when `zc-verify` is not installed); fix causes, never weaken tests. Commit fixes.
 
 ## Ending this step
 

@@ -16,7 +16,7 @@ Your last action is one `end_step` call; then stop.
 ```
 ## Phase complete
 Commit: <short sha of HEAD>
-Verification: <the verify.sh stages that ran and passed>
+Verification: <the zc-verify stages that ran and passed>
 Stage summary: <one line per checklist entry: what changed and which test proves it>
 Open: <anything wrong you found now, or "none">
 ```

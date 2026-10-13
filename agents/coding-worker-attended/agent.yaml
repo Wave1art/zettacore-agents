@@ -25,7 +25,7 @@ states:
     idle_timeout: 10m
     max_attempts: 2
     checks:
-      - {kind: command, command: [bash, .zcore/verify.sh], timeout: 900}
+      - {kind: command, command: [sh, -c, 'command -v zc-verify >/dev/null && exec zc-verify || exec bash .zcore/verify.sh'], timeout: 900}
   - name: review
     prompt: prompts/review.md
     time_budget: 15m
