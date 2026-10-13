@@ -25,7 +25,7 @@ Without `end_step`, post the summary with `post_comment` and end with the marker
 
 ## Rules
 
-- The shift runs your session: it claims the item, pushes the branch after every step, runs the gate, completes the run and moves the item to review. Never call `claim_item`, `complete_run`, `release_run`, `set_status`, `create_pr` or `mark_pr_ready` (the engine refuses them), and do not push.
+- The shift runs your session: it claims the item, checks out the item's own branch for you (`git branch --show-current`; its upstream is the branch the pull request targets), pushes it after every step, runs the gate, opens the pull request, completes the run and moves the item to review. Commit on that branch only: never switch, create or rebase branches, and do not push. Never call `claim_item`, `complete_run`, `release_run`, `set_status`, `create_pr` or `mark_pr_ready` (the engine refuses them).
 - Never pause for human input.
 - Never create, edit, delete or rename `.zcore/verify.sh`, `.sandcastle/bootstrap.sh` or anything under `.sandcastle/`; if the fix needs that, block with the proposed diff.
 - Smallest change that fixes the bug. Do not refactor, do not fix other bugs you notice; mention them in the summary.

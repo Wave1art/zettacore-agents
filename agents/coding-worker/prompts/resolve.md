@@ -24,7 +24,7 @@ If `end_step` is unavailable, end your last message with the marker instead (`<p
 
 ## Rules
 
-- The shift runs your session: it claims the item, pushes the branch after every step, runs the gate, completes the run and moves the item to review. Never call `claim_item`, `complete_run`, `release_run`, `set_status`, `create_pr` or `mark_pr_ready` (the engine refuses them), and do not push.
+- The shift runs your session: it claims the item, checks out the item's own branch for you (`git branch --show-current`; its upstream is the branch the pull request targets), pushes it after every step, runs the gate, opens the pull request, completes the run and moves the item to review. Commit on that branch only: never switch, create or rebase branches, and do not push. Never call `claim_item`, `complete_run`, `release_run`, `set_status`, `create_pr` or `mark_pr_ready` (the engine refuses them).
 - Never pause for human input. Decide, record the decision in a comment, continue.
 - Do not edit source files in this state.
 - Do not change `.zcore/verify.sh`, `.sandcastle/bootstrap.sh` or anything under `.sandcastle/`; they are the contract the gate executes.
