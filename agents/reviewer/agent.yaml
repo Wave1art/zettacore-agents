@@ -1,9 +1,9 @@
 key: reviewer
-version: 2.0.3
+version: 2.1.0
 description: Reviews a change on one axis (standards or spec) and records findings, a verdict comment and the review_verdict evidence.
 runtime: llm-loop
 profile: gate
-model: {tier: standard, fallback_tier: cheap}
+model: {tier: frontier, fallback_tier: standard}
 states:
   - name: standards
     prompt: prompts/standards.md
