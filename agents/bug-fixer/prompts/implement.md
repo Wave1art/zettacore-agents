@@ -12,7 +12,7 @@ Follow these in order. Do not skip ahead to a fix.
 4. **Hypothesise.** Rank two or three candidate causes, each with the observation that would rule it out. Instrument, run the red loop, discard what the evidence rules out.
 5. **Fix the cause**, not the symptom. Remove the instrumentation.
 6. **Regression test.** Keep the minimised check as a permanent test. It must fail without the fix and pass with it.
-7. Run `bash .zcore/verify.sh` with no arguments until it exits 0. Commit the fix and the test together as `fix(<scope>): <what>`.
+7. Run `zc-verify` with no arguments until it exits 0 (the pinned contract, exactly as the gate runs it; `bash .zcore/verify.sh` runs this branch's copy, which the gate never runs, so use it only when `zc-verify` is not installed). Commit the fix and the test together as `fix(<scope>): <what>`.
 
 ## Ending this step
 
@@ -25,7 +25,7 @@ Without `end_step`, post the summary with `post_comment` and end with the marker
 
 ## Rules
 
-- The shift runs your session: it claims the item, pushes the branch after every step, runs the gate, completes the run and moves the item to review. Never call `claim_item`, `complete_run`, `release_run`, `set_status`, `create_pr` or `mark_pr_ready` (the engine refuses them), and do not push.
+- The shift runs your session: it claims the item, checks out the item's own branch for you (`git branch --show-current`; its upstream is the branch the pull request targets), pushes it after every step, runs the gate, opens the pull request, completes the run and moves the item to review. Commit on that branch only: never switch, create or rebase branches, and do not push. Never call `claim_item`, `complete_run`, `release_run`, `set_status`, `create_pr` or `mark_pr_ready` (the engine refuses them).
 - Never pause for human input.
 - Never create, edit, delete or rename `.zcore/verify.sh`, `.sandcastle/bootstrap.sh` or anything under `.sandcastle/`; if the fix needs that, block with the proposed diff.
 - Smallest change that fixes the bug. Do not refactor, do not fix other bugs you notice; mention them in the summary.

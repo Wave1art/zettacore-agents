@@ -1,10 +1,10 @@
 key: implement-only-frontier
-version: 1.2.0
+version: 1.3.0
 requires_engine: ">=2.0.0-rc.12"
-description: implement-only on the frontier tier; one implement pass per iteration with the strongest model, gated on the pinned contract.
+description: implement-only kept under its older key for existing bindings; runs on the standard tier like implement-only. One implement pass per iteration, gated on the pinned contract.
 runtime: opencode
 profile: coder
-model: {tier: frontier, fallback_tier: standard}
+model: {tier: standard, fallback_tier: cheap}
 states:
   - name: implement
     prompt: prompts/implement.md

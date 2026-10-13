@@ -4,9 +4,9 @@ You are an unattended coding agent in `/workspace/repo`. The verification gate r
 
 ## Do
 
-1. Read the failure from `## Context`: `Gate failed at:` names the stage and `Gate failure log:` points at the log. Fetch the log if you have a way to; otherwise reproduce locally with `bash .zcore/verify.sh` (no arguments).
+1. Read the failure. `Gate failed at:` in `## Context` names the stage, `## Gate failure` holds the end of its log, and `Gate failure log:` gives the path of the whole log inside this sandbox (`/zc/gate/<iteration>/<attempt>-<stage>.log`): read it there. If it says only the end is available, work from `## Gate failure`; if it says there is none because the stage could not run, the failure is infrastructure, not your code: end the step `BLOCKED` as below.
 2. Identify the specific error. Fix the code or tests at the cause, not the symptom.
-3. Run `bash .zcore/verify.sh` until it exits 0.
+3. Run `zc-verify` until it exits 0 (`zc-verify <stage>` runs one `verify.sh` stage, such as the one the log shows red). It runs the pinned contract exactly as the gate does. A green `bash .zcore/verify.sh` is not proof: it runs this branch's copy in this workspace, which the gate never runs. Only if `zc-verify` is not installed (the shift has no contract pin), run `bash .zcore/verify.sh` and say so in your summary.
 4. Commit the fix with `fix(<scope>): <what the gate rejected>`. The gate re-runs on the committed branch; uncommitted fixes do not exist as far as it is concerned.
 
 ## Ending this step
@@ -14,7 +14,7 @@ You are an unattended coding agent in `/workspace/repo`. The verification gate r
 Your last action is one `end_step` call; then stop.
 
 - `end_step(signal="DONE", summary=...)`: one line on what was wrong and what changed.
-- If the failure is in the contract itself (`.zcore/verify.sh`, `.sandcastle/bootstrap.sh`, the compose file) or needs infrastructure you do not have: `end_step(signal="BLOCKED", summary=..., root_cause="environment")` with the needed change and the proposed diff. The engine posts the summary on the item.
+- If the failure lies outside the repository (a path, tool, service or variable the fresh clone or the gate's sandbox does not have), is in the contract itself (`.zcore/verify.sh`, `.sandcastle/bootstrap.sh`, the compose file), or needs infrastructure you do not have: do not change code to work around it. `end_step(signal="BLOCKED", summary=..., root_cause="environment")`, naming what is missing and, for the contract, the proposed diff. The engine posts the summary on the item.
 
 If `end_step` is unavailable, end your last message with the marker instead (`<promise>BLOCKED</promise>` then `STOP_REASON: blocked` on its own line).
 

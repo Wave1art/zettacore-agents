@@ -16,7 +16,7 @@ Your last action is one `end_step` call; then stop.
 ```
 ## Phase complete
 Commit: <short sha of HEAD>
-Verification: <the verify.sh stages that ran and passed>
+Verification: <the zc-verify stages that ran and passed>
 Stage summary: <one line per checklist entry: what changed and which test proves it>
 Open: <anything wrong you found now, or "none">
 ```
@@ -25,7 +25,7 @@ If `end_step` is unavailable, post that summary with `post_comment` and end your
 
 ## Rules
 
-- The shift runs your session: it claims the item, pushes the branch, runs the gate, completes the run and moves the item to review. Never call `claim_item`, `complete_run`, `release_run`, `set_status`, `create_pr` or `mark_pr_ready` (the engine refuses them), and do not push.
+- The shift runs your session: it claims the item, checks out the item's own branch for you (`git branch --show-current`; its upstream is the branch the pull request targets), pushes it after every step, runs the gate, opens the pull request, completes the run and moves the item to review. Commit on that branch only: never switch, create or rebase branches, and do not push. Never call `claim_item`, `complete_run`, `release_run`, `set_status`, `create_pr` or `mark_pr_ready` (the engine refuses them).
 - Never pause for human input.
 - Do not change code in this state. If you find something wrong now, put it under `Open:` and still close.
 - Do not move the item's status yourself; the host moves it to review when the gate is green.

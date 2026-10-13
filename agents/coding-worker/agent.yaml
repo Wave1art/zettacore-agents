@@ -1,6 +1,6 @@
 key: coding-worker
-version: 2.1.1
-requires_engine: ">=2.0.0-rc.10"
+version: 2.2.0
+requires_engine: ">=2.0.0-rc.12"
 description: Implements one phase of a feature through the five-state loop, gated on the pinned contract.
 runtime: opencode
 profile: coder
@@ -24,7 +24,7 @@ states:
     idle_timeout: 10m
     max_attempts: 2
     checks:
-      - {kind: command, command: [bash, .zcore/verify.sh], timeout: 900}
+      - {kind: command, command: [sh, -c, 'command -v zc-verify >/dev/null && exec zc-verify || exec bash .zcore/verify.sh'], timeout: 900}
   - name: review
     prompt: prompts/review.md
     time_budget: 15m
