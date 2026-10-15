@@ -112,22 +112,20 @@ reason for any row in error (invalid YAML, a missing prompt, a key owned by anot
 Authoring reference: `docs/agents/authoring.md` in the Zettacore repository (states, checks,
 custom sandbox images, versions and version policy).
 
-## Keys are unique across sources
+## When two sources ship the same key
 
-The first source to register a key owns it. The engine's sync refuses the same key from a second
-source and reports it on that source's row, in the words of
-`engine/src/zettacore_engine/services/agent_sources.py`:
+Sources are ordered (Zettacore ADR 0033, engine 2.0.0-rc.27 and later). A key belongs to the
+highest *enabled* source in that order that ships a valid definition of it; a source lower down
+that ships the same key shows it as **shadowed**, naming the repository that provides it.
 
-```python
-owner = await session.get(AgentDefinition, layout.key)
-if owner is not None and owner.source_id is not None and owner.source_id != source.id:
-    return DefinitionSyncResult(
-        key=layout.key,
-        status="error",
-        message=f"{layout.key!r} is already provided by agent source {owner.source_id}",
-    )
-```
+So to replace a starter agent with your fork's version under the same key (`coding-worker`):
 
-So a fork that keeps the key `coding-worker` collides with this repository while both are linked.
-Either rename your definition (`acme-coding-worker`) or disable this source first; per-source
-priority is a follow-up.
+1. Link your fork as an agent source (Admin > Agents).
+2. Move it above this repository in the source order. Its next sync takes the key; projects on
+   the `latest` version policy run your fork's newest version, and a project pinned to a version
+   keeps it.
+3. To go back, move it down or disable it: the key returns to this repository.
+
+Disabling a source hands its keys to the next enabled source that ships them; deleting one leaves
+its keys to whichever source ships them next. Registered versions are never removed, because runs
+reference them. Renaming your definition (`acme-coding-worker`) avoids the question altogether.
