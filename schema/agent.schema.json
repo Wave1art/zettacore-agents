@@ -80,6 +80,7 @@
             }
           ],
           "default": null,
+          "deprecated": true,
           "title": "Fallback Tier"
         },
         "tier": {
@@ -94,48 +95,297 @@
       "title": "ModelPolicy",
       "type": "object"
     },
-    "Permissions": {
+    "PermissionTable": {
       "additionalProperties": false,
+      "description": "OpenCode 1.18's ``PermissionConfig`` keys (``@opencode-ai/sdk`` ``types.gen.d.ts``). The\nkeys that take only an action take only an action there too. OpenCode also accepts other\nkeys (tool names); a definition may not, so a misspelt key is an error.",
       "properties": {
         "bash": {
           "anyOf": [
             {
+              "enum": [
+                "allow",
+                "ask",
+                "deny"
+              ],
+              "type": "string"
+            },
+            {
               "additionalProperties": {
                 "enum": [
                   "allow",
-                  "deny",
-                  "ask"
+                  "ask",
+                  "deny"
                 ],
                 "type": "string"
               },
               "type": "object"
-            },
-            {
-              "type": "null"
             }
           ],
-          "default": null,
           "title": "Bash"
+        },
+        "doom_loop": {
+          "enum": [
+            "allow",
+            "ask",
+            "deny"
+          ],
+          "title": "Doom Loop",
+          "type": "string"
+        },
+        "edit": {
+          "anyOf": [
+            {
+              "enum": [
+                "allow",
+                "ask",
+                "deny"
+              ],
+              "type": "string"
+            },
+            {
+              "additionalProperties": {
+                "enum": [
+                  "allow",
+                  "ask",
+                  "deny"
+                ],
+                "type": "string"
+              },
+              "type": "object"
+            }
+          ],
+          "title": "Edit"
         },
         "external_directory": {
           "anyOf": [
             {
               "enum": [
                 "allow",
-                "deny",
-                "ask"
+                "ask",
+                "deny"
               ],
               "type": "string"
             },
             {
-              "type": "null"
+              "additionalProperties": {
+                "enum": [
+                  "allow",
+                  "ask",
+                  "deny"
+                ],
+                "type": "string"
+              },
+              "type": "object"
             }
           ],
-          "default": null,
           "title": "External Directory"
+        },
+        "glob": {
+          "anyOf": [
+            {
+              "enum": [
+                "allow",
+                "ask",
+                "deny"
+              ],
+              "type": "string"
+            },
+            {
+              "additionalProperties": {
+                "enum": [
+                  "allow",
+                  "ask",
+                  "deny"
+                ],
+                "type": "string"
+              },
+              "type": "object"
+            }
+          ],
+          "title": "Glob"
+        },
+        "grep": {
+          "anyOf": [
+            {
+              "enum": [
+                "allow",
+                "ask",
+                "deny"
+              ],
+              "type": "string"
+            },
+            {
+              "additionalProperties": {
+                "enum": [
+                  "allow",
+                  "ask",
+                  "deny"
+                ],
+                "type": "string"
+              },
+              "type": "object"
+            }
+          ],
+          "title": "Grep"
+        },
+        "list": {
+          "anyOf": [
+            {
+              "enum": [
+                "allow",
+                "ask",
+                "deny"
+              ],
+              "type": "string"
+            },
+            {
+              "additionalProperties": {
+                "enum": [
+                  "allow",
+                  "ask",
+                  "deny"
+                ],
+                "type": "string"
+              },
+              "type": "object"
+            }
+          ],
+          "title": "List"
+        },
+        "lsp": {
+          "anyOf": [
+            {
+              "enum": [
+                "allow",
+                "ask",
+                "deny"
+              ],
+              "type": "string"
+            },
+            {
+              "additionalProperties": {
+                "enum": [
+                  "allow",
+                  "ask",
+                  "deny"
+                ],
+                "type": "string"
+              },
+              "type": "object"
+            }
+          ],
+          "title": "Lsp"
+        },
+        "question": {
+          "enum": [
+            "allow",
+            "ask",
+            "deny"
+          ],
+          "title": "Question",
+          "type": "string"
+        },
+        "read": {
+          "anyOf": [
+            {
+              "enum": [
+                "allow",
+                "ask",
+                "deny"
+              ],
+              "type": "string"
+            },
+            {
+              "additionalProperties": {
+                "enum": [
+                  "allow",
+                  "ask",
+                  "deny"
+                ],
+                "type": "string"
+              },
+              "type": "object"
+            }
+          ],
+          "title": "Read"
+        },
+        "skill": {
+          "anyOf": [
+            {
+              "enum": [
+                "allow",
+                "ask",
+                "deny"
+              ],
+              "type": "string"
+            },
+            {
+              "additionalProperties": {
+                "enum": [
+                  "allow",
+                  "ask",
+                  "deny"
+                ],
+                "type": "string"
+              },
+              "type": "object"
+            }
+          ],
+          "title": "Skill"
+        },
+        "task": {
+          "anyOf": [
+            {
+              "enum": [
+                "allow",
+                "ask",
+                "deny"
+              ],
+              "type": "string"
+            },
+            {
+              "additionalProperties": {
+                "enum": [
+                  "allow",
+                  "ask",
+                  "deny"
+                ],
+                "type": "string"
+              },
+              "type": "object"
+            }
+          ],
+          "title": "Task"
+        },
+        "todowrite": {
+          "enum": [
+            "allow",
+            "ask",
+            "deny"
+          ],
+          "title": "Todowrite",
+          "type": "string"
+        },
+        "webfetch": {
+          "enum": [
+            "allow",
+            "ask",
+            "deny"
+          ],
+          "title": "Webfetch",
+          "type": "string"
+        },
+        "websearch": {
+          "enum": [
+            "allow",
+            "ask",
+            "deny"
+          ],
+          "title": "Websearch",
+          "type": "string"
         }
       },
-      "title": "Permissions",
+      "title": "PermissionTable",
       "type": "object"
     },
     "PredicateCheck": {
@@ -158,6 +408,21 @@
       "title": "PredicateCheck",
       "type": "object"
     },
+    "Requirement": {
+      "additionalProperties": true,
+      "description": "One ``requires:`` entry the engine's binding check reads (``services/binding.py``): its\n``type`` (``repo``, ``secret_keys``, ``model`` with a ``tier``; the others the worker\nresolves) and that type's own keys.",
+      "properties": {
+        "type": {
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "Requirement",
+      "type": "object"
+    },
     "Sandbox": {
       "additionalProperties": false,
       "properties": {
@@ -168,7 +433,7 @@
           "type": "string"
         },
         "dockerd": {
-          "default": true,
+          "default": false,
           "title": "Dockerd",
           "type": "boolean"
         },
@@ -185,7 +450,7 @@
           "title": "Image"
         },
         "memory": {
-          "default": "4Gi",
+          "default": "8Gi",
           "pattern": "^\\d+(Mi|Gi)$",
           "title": "Memory",
           "type": "string"
@@ -240,13 +505,20 @@
           "type": "array"
         },
         "idle_timeout": {
-          "default": "PT10M",
-          "pattern": "^\\d+[smh]$",
-          "title": "Idle Timeout",
-          "type": "string"
+          "anyOf": [
+            {
+              "pattern": "^\\d+[smh]$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Idle Timeout"
         },
         "max_attempts": {
-          "default": 3,
+          "default": 1,
           "minimum": 1,
           "title": "Max Attempts",
           "type": "integer"
@@ -295,6 +567,19 @@
           "title": "Gate",
           "type": "string"
         },
+        "hibernate": {
+          "anyOf": [
+            {
+              "pattern": "^\\d+[smh]$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Hibernate"
+        },
         "idle": {
           "default": "PT20M",
           "pattern": "^\\d+[smh]$",
@@ -330,16 +615,37 @@
     "model": {
       "$ref": "#/$defs/ModelPolicy"
     },
-    "permissions": {
+    "name": {
       "anyOf": [
         {
-          "$ref": "#/$defs/Permissions"
+          "type": "string"
         },
         {
           "type": "null"
         }
       ],
-      "default": null
+      "default": null,
+      "title": "Name"
+    },
+    "permissions": {
+      "anyOf": [
+        {
+          "enum": [
+            "allow",
+            "ask",
+            "deny"
+          ],
+          "type": "string"
+        },
+        {
+          "$ref": "#/$defs/PermissionTable"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Permissions"
     },
     "profile": {
       "default": "coder",
@@ -350,10 +656,29 @@
       "title": "Profile",
       "type": "string"
     },
+    "queue": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Queue"
+    },
     "remediation": {
       "default": true,
       "title": "Remediation",
       "type": "boolean"
+    },
+    "requires": {
+      "items": {
+        "$ref": "#/$defs/Requirement"
+      },
+      "title": "Requires",
+      "type": "array"
     },
     "requires_engine": {
       "anyOf": [
@@ -381,6 +706,8 @@
     },
     "skills": {
       "items": {
+        "maxLength": 64,
+        "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
         "type": "string"
       },
       "title": "Skills",

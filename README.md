@@ -12,7 +12,11 @@ This repository has its own version (`v1.0.0` onwards, semver) and releases with
 Each definition may declare `requires_engine` (a version range such as `">=2.0.0-rc.10"`): an
 engine outside the range does not register it, and a source following `latest` stays on the
 newest tag whose definitions all run on that engine. From `v1.3.0` the OpenCode definitions
-require Zettacore `2.0.0-rc.10` or later, the first engine with `end_step`.
+require Zettacore `2.0.0-rc.10` or later, the first engine with `end_step`, and from `v1.4.0`
+(the `-frontier` keys) and `v1.6.0` (the rest) `2.0.0-rc.12`, the first that checks out the
+item's own branch. `v1.7.0` drops `skills` and `model.fallback_tier` from every definition
+(Zettacore ADR 0032) and makes all of them, `reviewer` and `overseer` included, require
+`2.0.0-rc.27`; an older engine following `latest` stays on `v1.6.0`.
 
 ## Layout
 
@@ -32,21 +36,21 @@ from a Zettacore clone: `uv run zc agents validate /path/to/zettacore-agents/age
 ## The agents
 
 Every definition names its model as a tier: the LiteLLM model group `zc/<tier>` the install
-serves (`zc/standard` with `zc/cheap` as the fallback here, and `zc/frontier` with `zc/standard` as the fallback for `reviewer`; every coding definition, the two `-frontier` keys included, runs on `zc/standard`; ADR 0008). `profile: coder` may push to the item's
+serves (`zc/standard` for every definition except `reviewer`, which names `zc/frontier`; every coding definition, the two `-frontier` keys included, runs on `zc/standard`; ADR 0008). A definition names one tier: fallbacks between models are LiteLLM's routing (ADR 0004), not part of the definition. The starter set needs only `zc/standard` and `zc/frontier`; none names `zc/cheap`. `profile: coder` may push to the item's
 branch; `profile: gate` never pushes. A project enables a definition on a Temporal task queue
 (Project settings > Agents, one definition per queue, ADR 0002); the work type's allocation then
 routes items to that queue or to the definition by name.
 
-| Key | Purpose | Runtime / profile | Serves | Tiers (`zc/<tier>`, then fallback) | Sandbox and runtime notes |
+| Key | Purpose | Runtime / profile | Serves | Tier (`zc/<tier>`) | Sandbox and runtime notes |
 |---|---|---|---|---|---|
-| `coding-worker` | Implements one phase through the five-state loop `resolve, implement, verify, review, handoff`: decides what to build from the item and its spec, builds it against `.zc/checklist.md`, runs the pinned verification contract with `zc-verify` as the gate does, reviews the diff as a senior colleague would, then closes the item for the host push and gate. One remediation pass after a red gate. | `opencode`, `coder`, unattended | `phase` items (allocation `queue:shift-coding`) on the queue it is enabled on, `shift-coding` by default | `standard`, `cheap` | 1 CPU, 2 GiB, `dockerd: true` (compose-based test suites); exit checks: `checklist_exists` after implement, `zc-verify` after verify (`bash .zcore/verify.sh` where the sandbox has no `zc-verify`), checklist complete after handoff; idle 20 m, gate 10 m, bootstrap 2 m |
-| `coding-worker-frontier` | `coding-worker` kept under its older key for existing bindings: the same five-state loop, prompts and checks, now on the standard tier. | `opencode`, `coder`, unattended | `phase` items (allocation `queue:shift-coding`) on the queue it is enabled on | `standard`, `cheap` | As `coding-worker` |
-| `coding-worker-attended` | The same five-state loop, but `interaction: attended`: every OpenCode permission prompt becomes a `question` in the inbox and the shift waits for the answer instead of allowing it once. | `opencode`, `coder`, attended | `phase` items, on its own queue (one definition per queue) | `standard`, `cheap` | As `coding-worker`; the open question holds the idle clock |
-| `implement-only` | Single-state variant of `coding-worker`: plan, build, verify and close in one `implement` pass per iteration, gated on the pinned contract. The cheapest way to run a well-specified phase. | `opencode`, `coder`, unattended | `phase` items on the queue it is enabled on | `standard`, `cheap` | 1 CPU, 2 GiB, `dockerd: true`; one 60 m state, two attempts; idle 20 m, gate 10 m |
-| `implement-only-frontier` | `implement-only` kept under its older key for existing bindings: the same single `implement` pass, now on the standard tier. | `opencode`, `coder`, unattended | `phase` items on the queue it is enabled on | `standard`, `cheap` | As `implement-only` |
-| `bug-fixer` | Diagnoses one defect from the bug's `brief` and `repro` fields, reproduces it with a failing regression test, fixes the cause (not the symptom) and closes the item, gated on the pinned contract. | `opencode`, `coder`, unattended | `bug` items (allocation `agent:bug-fixer`) | `standard`, `cheap` | 1 CPU, 2 GiB, `dockerd: true`; one 60 m state, two attempts; idle 20 m, gate 10 m |
-| `reviewer` | Reviews a change on one axis per run, by the criteria of the attended `/zc:review` skill: `standards` (the project's conventions, lessons, style guides and `CONTEXT.md` vocabulary, each finding citing its rule; Minimal Impact, Simplicity First, No Laziness; the implementer's refactoring candidates re-checked) or `spec` (each acceptance criterion met, partly met or missing; the Spec's requirements and Standing invariants; `reversibility` and `blast_radius` confirmed or challenged). Records findings as `review` checklist entries, a `## Review verdict:` comment and the `review_verdict` evidence. | `llm-loop`, `gate` | `review` items (allocation `agent:reviewer`) on queue `shift-review`; a `ReviewWorkflow` clones for the diff and never pushes | `frontier`, `standard` | 1 CPU, 1 GiB, no dockerd; bounded LiteLLM calls, 15 m per axis, one attempt |
-| `overseer` | Supervises a shift that stopped at an exit state: `diagnose` names the cause and the action in one sentence; `repair` writes a brief of at most five lines for the corrective pass. Relaunches or repairs within `authorities.yaml` (one relaunch, repair allowed; `contract_integrity` and `decision_timeout` always escalate), else escalates to the inbox. | `llm-loop`, `gate` | Started by `ShiftWorkflow` on queue `shift-oversight` when the project enables `overseer`; no item allocation | `standard`, `cheap` | 1 CPU, 1 GiB, no dockerd; 10 m per state, one attempt; a decision escalated to a person times out after 24 h |
+| `coding-worker` | Implements one phase through the five-state loop `resolve, implement, verify, review, handoff`: decides what to build from the item and its spec, builds it against `.zc/checklist.md`, runs the pinned verification contract with `zc-verify` as the gate does, reviews the diff as a senior colleague would, then closes the item for the host push and gate. One remediation pass after a red gate. | `opencode`, `coder`, unattended | `phase` items (allocation `queue:shift-coding`) on the queue it is enabled on, `shift-coding` by default | `standard` | 1 CPU, 2 GiB, `dockerd: true` (compose-based test suites); exit checks: `checklist_exists` after implement, `zc-verify` after verify (`bash .zcore/verify.sh` where the sandbox has no `zc-verify`), checklist complete after handoff; idle 20 m, gate 10 m, bootstrap 2 m |
+| `coding-worker-frontier` | `coding-worker` kept under its older key for existing bindings: the same five-state loop, prompts and checks, now on the standard tier. | `opencode`, `coder`, unattended | `phase` items (allocation `queue:shift-coding`) on the queue it is enabled on | `standard` | As `coding-worker` |
+| `coding-worker-attended` | The same five-state loop, but `interaction: attended`: every OpenCode permission prompt becomes a `question` in the inbox and the shift waits for the answer instead of allowing it once. | `opencode`, `coder`, attended | `phase` items, on its own queue (one definition per queue) | `standard` | As `coding-worker`; the open question holds the idle clock |
+| `implement-only` | Single-state variant of `coding-worker`: plan, build, verify and close in one `implement` pass per iteration, gated on the pinned contract. The cheapest way to run a well-specified phase. | `opencode`, `coder`, unattended | `phase` items on the queue it is enabled on | `standard` | 1 CPU, 2 GiB, `dockerd: true`; one 60 m state, two attempts; idle 20 m, gate 10 m |
+| `implement-only-frontier` | `implement-only` kept under its older key for existing bindings: the same single `implement` pass, now on the standard tier. | `opencode`, `coder`, unattended | `phase` items on the queue it is enabled on | `standard` | As `implement-only` |
+| `bug-fixer` | Diagnoses one defect from the bug's `brief` and `repro` fields, reproduces it with a failing regression test, fixes the cause (not the symptom) and closes the item, gated on the pinned contract. | `opencode`, `coder`, unattended | `bug` items (allocation `agent:bug-fixer`) | `standard` | 1 CPU, 2 GiB, `dockerd: true`; one 60 m state, two attempts; idle 20 m, gate 10 m |
+| `reviewer` | Reviews a change on one axis per run, by the criteria of the attended `/zc:review` skill: `standards` (the project's conventions, lessons, style guides and `CONTEXT.md` vocabulary, each finding citing its rule; Minimal Impact, Simplicity First, No Laziness; the implementer's refactoring candidates re-checked) or `spec` (each acceptance criterion met, partly met or missing; the Spec's requirements and Standing invariants; `reversibility` and `blast_radius` confirmed or challenged). Records findings as `review` checklist entries, a `## Review verdict:` comment and the `review_verdict` evidence. | `llm-loop`, `gate` | `review` items (allocation `agent:reviewer`) on queue `shift-review`; a `ReviewWorkflow` clones for the diff and never pushes | `frontier` | 1 CPU, 1 GiB, no dockerd; bounded LiteLLM calls, 15 m per axis, one attempt |
+| `overseer` | Supervises a shift that stopped at an exit state: `diagnose` names the cause and the action in one sentence; `repair` writes a brief of at most five lines for the corrective pass. Relaunches or repairs within `authorities.yaml` (one relaunch, repair allowed; `contract_integrity` and `decision_timeout` always escalate), else escalates to the inbox. | `llm-loop`, `gate` | Started by `ShiftWorkflow` on queue `shift-oversight` when the project enables `overseer`; no item allocation | `standard` | 1 CPU, 1 GiB, no dockerd; 10 m per state, one attempt; a decision escalated to a person times out after 24 h |
 
 The OpenCode definitions share `prompts/remediation.md` (one corrective pass after a red gate)
 and the permission map `bash: {"*": allow, "rm -rf *": deny}`. Every prompt stays around 400
@@ -108,22 +112,20 @@ reason for any row in error (invalid YAML, a missing prompt, a key owned by anot
 Authoring reference: `docs/agents/authoring.md` in the Zettacore repository (states, checks,
 custom sandbox images, versions and version policy).
 
-## Keys are unique across sources
+## When two sources ship the same key
 
-The first source to register a key owns it. The engine's sync refuses the same key from a second
-source and reports it on that source's row, in the words of
-`engine/src/zettacore_engine/services/agent_sources.py`:
+Sources are ordered (Zettacore ADR 0033, engine 2.0.0-rc.27 and later). A key belongs to the
+highest *enabled* source in that order that ships a valid definition of it; a source lower down
+that ships the same key shows it as **shadowed**, naming the repository that provides it.
 
-```python
-owner = await session.get(AgentDefinition, layout.key)
-if owner is not None and owner.source_id is not None and owner.source_id != source.id:
-    return DefinitionSyncResult(
-        key=layout.key,
-        status="error",
-        message=f"{layout.key!r} is already provided by agent source {owner.source_id}",
-    )
-```
+So to replace a starter agent with your fork's version under the same key (`coding-worker`):
 
-So a fork that keeps the key `coding-worker` collides with this repository while both are linked.
-Either rename your definition (`acme-coding-worker`) or disable this source first; per-source
-priority is a follow-up.
+1. Link your fork as an agent source (Admin > Agents).
+2. Move it above this repository in the source order. Its next sync takes the key; projects on
+   the `latest` version policy run your fork's newest version, and a project pinned to a version
+   keeps it.
+3. To go back, move it down or disable it: the key returns to this repository.
+
+Disabling a source hands its keys to the next enabled source that ships them; deleting one leaves
+its keys to whichever source ships them next. Registered versions are never removed, because runs
+reference them. Renaming your definition (`acme-coding-worker`) avoids the question altogether.
