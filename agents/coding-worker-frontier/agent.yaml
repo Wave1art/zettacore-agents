@@ -1,10 +1,10 @@
 key: coding-worker-frontier
-version: 1.3.0
-requires_engine: ">=2.0.0-rc.12"
+version: 1.3.1
+requires_engine: ">=2.0.0-rc.27"
 description: coding-worker kept under its older key for existing bindings; runs on the standard tier like coding-worker. The same five-state loop, gated on the pinned contract.
 runtime: opencode
 profile: coder
-model: {tier: standard, fallback_tier: cheap}
+model: {tier: standard}
 states:
   - name: resolve
     prompt: prompts/resolve.md
@@ -38,7 +38,6 @@ states:
     checks:
       - {kind: checklist}
 remediation: true
-skills: [implement]
 permissions: {bash: {"*": allow, "rm -rf *": deny}, external_directory: allow}
 sandbox: {cpu: "1", memory: 2Gi, dockerd: true}
 timeouts: {idle: 20m, gate: 10m, bootstrap: 2m}
