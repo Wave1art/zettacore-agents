@@ -1,5 +1,5 @@
 key: reviewer
-version: 2.1.1
+version: 2.2.0
 requires_engine: ">=2.0.0-rc.27"
 description: Reviews a change on one axis (standards or spec) and records findings, a verdict comment and the review_verdict evidence.
 runtime: llm-loop

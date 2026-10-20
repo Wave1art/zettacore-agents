@@ -1,5 +1,5 @@
 key: implement-only
-version: 2.2.1
+version: 2.3.0
 requires_engine: ">=2.0.0-rc.27"
 description: Single-state variant of coding-worker; one implement pass per iteration, gated on the pinned contract.
 runtime: opencode
