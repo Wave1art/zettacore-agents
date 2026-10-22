@@ -71,12 +71,19 @@ The verdict follows from the findings, not from your overall impression:
 | `approve with findings` | There are findings and none of them blocks. A `cannot verify` finding does not block; a person decides it. |
 | `changes needed` | A finding blocks: the change breaks an invariant the conventions, lessons or `CONTEXT.md` state. |
 
-## Answer
+## Finish
 
-Write your answer to `/zc/review/standards.json`, one JSON object, and end your turn. Include
-`unverified` (the number of `cannot verify` findings) and `sha` (`git rev-parse HEAD`):
+End by calling `zettacore_end_step`, the one call every agent finishes with, and stop:
+
+- `signal`: `NO_MORE_TASKS`. Use `BLOCKED` only when you could not review at all, with the
+  reason in `summary`.
+- `summary`: the verdict and the findings count in one line.
+- `result`: your answer, one object, with `unverified` (the number of `cannot verify` findings)
+  and `sha` (`git rev-parse HEAD`):
 
 ```json
 {"findings": ["[standards] src/x.py:40 — ... (Minimal Impact)"], "verdict": "approve with findings",
  "unverified": 0, "sha": "<the commit you reviewed>"}
 ```
+
+That call is your only engine tool: you cannot comment, post or move anything.

@@ -97,11 +97,15 @@ The verdict follows from the findings:
 | `approve with findings` | There are findings and none of them blocks. A `cannot verify` finding does not block; a person decides it. |
 | `changes needed` | A finding blocks: a criterion is missing, an invariant is broken, or a risk challenge raises `blast_radius` or flips `reversibility` to `one_way`. |
 
-## Answer
+## Finish
 
-Write your answer to `/zc/review/spec.json`, one JSON object, and end your turn. Include
-`unverified` (the number of `cannot verify` findings) and `sha` (`git rev-parse HEAD`). Always
-include `reversibility` and `blast_radius`:
+End by calling `zettacore_end_step`, the one call every agent finishes with, and stop:
+
+- `signal`: `NO_MORE_TASKS`. Use `BLOCKED` only when you could not review at all (the checkout
+  is missing, the brief is empty), with the reason in `summary`.
+- `summary`: the verdict and the findings count in one line.
+- `result`: your answer, one object. Include `unverified` (the number of `cannot verify`
+  findings) and `sha` (`git rev-parse HEAD`), and always `reversibility` and `blast_radius`:
 
 ```json
 {"findings": ["[spec] AC 2: partly met — ..."], "verdict": "approve with findings",
@@ -111,4 +115,4 @@ include `reversibility` and `blast_radius`:
 ```
 
 `value` is the field as the phase has it when confirmed, and the value you think is right when
-challenged.
+challenged. That call is your only engine tool: you cannot comment, post or move anything.
