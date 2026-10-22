@@ -1,5 +1,5 @@
 key: implement-only-frontier
-version: 1.3.1
+version: 1.4.0
 requires_engine: ">=2.0.0-rc.27"
 description: implement-only kept under its older key for existing bindings; runs on the standard tier like implement-only. One implement pass per iteration, gated on the pinned contract.
 runtime: opencode

@@ -16,7 +16,10 @@ require Zettacore `2.0.0-rc.10` or later, the first engine with `end_step`, and 
 (the `-frontier` keys) and `v1.6.0` (the rest) `2.0.0-rc.12`, the first that checks out the
 item's own branch. `v1.7.0` drops `skills` and `model.fallback_tier` from every definition
 (Zettacore ADR 0032) and makes all of them, `reviewer` and `overseer` included, require
-`2.0.0-rc.27`; an older engine following `latest` stays on `v1.6.0`.
+`2.0.0-rc.27`; an older engine following `latest` stays on `v1.6.0`. `v1.8.0` changes prompts
+only, with the same engine range: every agent narrates one sentence of intent before its tool
+calls, so a run's transcript reads as more than tool calls, and the checklist prompts say `.zc/`
+is the host's and never committed.
 
 ## Layout
 
