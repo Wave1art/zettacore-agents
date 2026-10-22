@@ -77,8 +77,8 @@ earlier steps ended, the handoff pointers) and ends the step with one `end_step`
 The worker reads the call from OpenCode's event stream and acts on it; the `<promise>` markers
 stay as the fallback when the tool is unavailable. The shift pushes the branch after every step,
 so the prompts ask the agent to commit as it goes and never to push. `reviewer` ends with `end_step`
-too, its verdict in `result`, on a token whose only tool that is; `overseer` runs bounded
-LiteLLM calls without them and keeps its markers. All of them run the default Zettacore sandbox image; none sets `sandbox.image`.
+too, its verdict in `result`, on a token whose only engine tool is `end_step`; `overseer` runs
+bounded LiteLLM calls without the engine's tools and keeps its markers. All of them run the default Zettacore sandbox image; none sets `sandbox.image`.
 
 Per-agent evals are not part of this release; the definitions are validated against the schema
 and exercised by Zettacore's own journeys.
