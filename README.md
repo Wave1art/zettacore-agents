@@ -23,7 +23,10 @@ is the host's and never committed. `v2.0.0` makes `reviewer` 3.0.0 an OpenCode a
 own environment (Zettacore ADR 0051) and requires `2.0.0-rc.48`; an older engine following
 `latest` stays on `v1.8.0`. `v2.1.0` (`reviewer` 3.1.0) ends each axis with `end_step` carrying
 the verdict as its `result`, as every agent finishes, instead of an answer file, and requires
-`2.0.0-rc.49`; an older engine following `latest` stays on `v2.0.0`.
+`2.0.0-rc.49`; an older engine following `latest` stays on `v2.0.0`. `v2.2.0` adds `planner`
+1.0.0, the planning agent of Zettacore ADR 0055 (`profile: planner`), which requires
+`2.0.0-rc.60`; an older engine following `latest` stays on `v2.1.0`. Its schema copy is
+regenerated, which also adds `profile: reviewer`, missing from the copy since `v2.0.0`.
 
 ## Layout
 
@@ -31,6 +34,7 @@ the verdict as its `result`, as every agent finishes, instead of an answer file,
 agents/<key>/agent.yaml          # the definition; key equals the directory name
 agents/<key>/prompts/<state>.md  # one prompt per state, plus remediation.md where remediation is on
 agents/<key>/authorities.yaml    # overseer only: what it may decide without a person
+agents/<key>/skills/<name>/SKILL.md  # planner only: the skills its OpenCode loads (Zettacore ADR 0032)
 schema/agent.schema.json         # JSON Schema for agent.yaml
 LICENSE                          # MIT, the same licence as Zettacore
 ```
@@ -43,8 +47,10 @@ from a Zettacore clone: `uv run zc agents validate /path/to/zettacore-agents/age
 ## The agents
 
 Every definition names its model as a tier: the LiteLLM model group `zc/<tier>` the install
-serves (`zc/standard` for every definition except `reviewer`, which names `zc/frontier`; every coding definition, the two `-frontier` keys included, runs on `zc/standard`; ADR 0008). A definition names one tier: fallbacks between models are LiteLLM's routing (ADR 0004), not part of the definition. The starter set needs only `zc/standard` and `zc/frontier`; none names `zc/cheap`. `profile: coder` may push to the item's
-branch; `profile: gate` never pushes. A project enables a definition on a Temporal task queue
+serves (`zc/standard` for every definition except `reviewer` and `planner`, which name `zc/frontier`; every coding definition, the two `-frontier` keys included, runs on `zc/standard`; ADR 0008). A definition names one tier: fallbacks between models are LiteLLM's routing (ADR 0004), not part of the definition. The starter set needs only `zc/standard` and `zc/frontier`; none names `zc/cheap`. `profile: coder` may push to the item's
+branch; `profile: gate` never pushes; `profile: planner` writes items and item-scope inputs
+under the item it plans and never pushes (its token is minted only for a definition declaring
+it, enabled by the project's owner). A project enables a definition on a Temporal task queue
 (Project settings > Agents, one definition per queue, ADR 0002); the work type's allocation then
 routes items to that queue or to the definition by name.
 
@@ -57,10 +63,11 @@ routes items to that queue or to the definition by name.
 | `implement-only-frontier` | `implement-only` kept under its older key for existing bindings: the same single `implement` pass, now on the standard tier. | `opencode`, `coder`, unattended | `phase` items on the queue it is enabled on | `standard` | As `implement-only` |
 | `bug-fixer` | Diagnoses one defect from the bug's `brief` and `repro` fields, reproduces it with a failing regression test, fixes the cause (not the symptom) and closes the item, gated on the pinned contract. | `opencode`, `coder`, unattended | `bug` items (allocation `agent:bug-fixer`) | `standard` | 1 CPU, 2 GiB, `dockerd: true`; one 60 m state, two attempts; idle 20 m, gate 10 m |
 | `reviewer` | Reviews a change as an agent in the change's own environment (Zettacore ADR 0051), spec then standards in one sandbox, by the criteria of the attended `/zc:review` skill: `spec` (each acceptance criterion met, partly met, missing or cannot verify, with file:line evidence or a probe it ran; the Spec's requirements and Standing invariants; `reversibility` and `blast_radius` confirmed or challenged) and `standards` (every changed file against the project's conventions, lessons, style guides and `CONTEXT.md` vocabulary, each finding citing its rule; Minimal Impact, Simplicity First, No Laziness; the implementer's refactoring candidates re-checked). Reads a brief of every changed file, the Spec and the green gate, opens and runs what it needs, and ends with `end_step` carrying its verdict for the workflow to record. | `opencode`, `reviewer` | `review` items (allocation `agent:reviewer`) on queue `shift-review`; one `ReviewWorkflow` per round, checked out at the green gate's commit, with no push | `frontier` | The reviewed item's environment and dev stack (its own `sandbox` only without one); 45 m per axis, one attempt |
+| `planner` | Plans one item through its planning item (Zettacore ADR 0055) in three states: `survey` reads the planning item's brief and any send-back, the target, the work types (`list_work_types`), the repositories and the workspace; `plan` drafts and checks the plan, then writes it: a feature's tracer-bullet phases with plans, checklists, risk fields and `precedes` relations (the substance of `/zc:spec-to-tickets`), an initiative's first ring of decisions and its features (`/zc:scope`), a task's or a bug's body, checklists and fields, and the item-scope workspace inputs the work needs (`declare_workspace_input`, credentials named, never held); `check` runs the readiness check and ends with `end_step` `NO_MORE_TASKS` carrying the `## Plan summary` (items and dependencies, coverage, workspace, missing credentials with their console links, open questions, verdict), which becomes the planning item's closing comment for a person to accept or send back. Never readies, starts, claims or deletes, never sets a start mode, never declares at repository or project scope, never calls `request_access`. Its skills (`skills/`) hold the substance; the prompts stay short. | `opencode`, `planner`, unattended | `planning` items (allocation `queue:planning`), created by Plan this or `plan_item`; the project's `planning` work queue is created with it as the default when an owner enables it | `frontier` | The worker's planner image (`ZC_PLANNER_IMAGE`, chosen by the profile; no `sandbox.image`): the target's repository cloned, every other repository of the project read-only under `~/repos/<owner>/<repo>`, no push credential; 1 CPU, 2 GiB, no dockerd; no remediation, no gate; `edit`, `webfetch` and `websearch` denied; 15 m survey, 40 m plan, 15 m check, two attempts each |
 | `overseer` | Supervises a shift that stopped at an exit state: `diagnose` names the cause and the action in one sentence; `repair` writes a brief of at most five lines for the corrective pass. Relaunches or repairs within `authorities.yaml` (one relaunch, repair allowed; `contract_integrity` and `decision_timeout` always escalate), else escalates to the inbox. | `llm-loop`, `gate` | Started by `ShiftWorkflow` on queue `shift-oversight` when the project enables `overseer`; no item allocation | `standard` | 1 CPU, 1 GiB, no dockerd; 10 m per state, one attempt; a decision escalated to a person times out after 24 h |
 
-The OpenCode definitions share `prompts/remediation.md` (one corrective pass after a red gate)
-and the permission map `bash: {"*": allow, "rm -rf *": deny}`. Every prompt stays around 400
+The OpenCode coding definitions share `prompts/remediation.md` (one corrective pass after a red
+gate), and every OpenCode definition the permission map `bash: {"*": allow, "rm -rf *": deny}`. Every prompt stays around 400
 words.
 
 ### How an OpenCode agent talks to its shift
@@ -78,7 +85,11 @@ The worker reads the call from OpenCode's event stream and acts on it; the `<pro
 stay as the fallback when the tool is unavailable. The shift pushes the branch after every step,
 so the prompts ask the agent to commit as it goes and never to push. `reviewer` ends with `end_step`
 too, its verdict in `result`, on a token whose only engine tool is `end_step`; `overseer` runs
-bounded LiteLLM calls without the engine's tools and keeps its markers. All of them run the default Zettacore sandbox image; none sets `sandbox.image`.
+bounded LiteLLM calls without the engine's tools and keeps its markers. `planner` pushes nothing
+(it has no push credential and changes no code): its `NO_MORE_TASKS` summary is its plan summary,
+and the shift completes its run, which moves the planning item to review. None sets
+`sandbox.image`: every definition runs the default Zettacore sandbox image, except `planner`,
+which the worker runs in its planner image because of its profile.
 
 Per-agent evals are not part of this release; the definitions are validated against the schema
 and exercised by Zettacore's own journeys.
