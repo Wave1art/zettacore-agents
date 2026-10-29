@@ -66,6 +66,49 @@
       "title": "LlmReviewCheck",
       "type": "object"
     },
+    "LocalMcpServer": {
+      "additionalProperties": false,
+      "description": "OpenCode 1.18's local MCP server, a command the sandbox runs.",
+      "properties": {
+        "command": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Command",
+          "type": "array"
+        },
+        "enabled": {
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "environment": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Environment",
+          "type": "object"
+        },
+        "timeout": {
+          "description": "milliseconds",
+          "exclusiveMinimum": 0,
+          "title": "Timeout",
+          "type": "integer"
+        },
+        "type": {
+          "const": "local",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "command"
+      ],
+      "title": "LocalMcpServer",
+      "type": "object"
+    },
     "ModelPolicy": {
       "additionalProperties": false,
       "properties": {
@@ -388,6 +431,41 @@
       "title": "PermissionTable",
       "type": "object"
     },
+    "PluginEntry": {
+      "additionalProperties": false,
+      "description": "An OpenCode plugin: a file of the definition (``plugins/<file>``) or an npm package at an\nexact version, and the options OpenCode hands it.",
+      "oneOf": [
+        {
+          "required": [
+            "file"
+          ]
+        },
+        {
+          "required": [
+            "npm"
+          ]
+        }
+      ],
+      "properties": {
+        "file": {
+          "pattern": "\\.(js|ts)$",
+          "title": "File",
+          "type": "string"
+        },
+        "npm": {
+          "pattern": "^(@[a-z0-9][a-z0-9._-]*/)?[a-z0-9][a-z0-9._-]*@(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(-[0-9A-Za-z.-]+)?(\\+[0-9A-Za-z.-]+)?$",
+          "title": "Npm",
+          "type": "string"
+        },
+        "options": {
+          "additionalProperties": true,
+          "title": "Options",
+          "type": "object"
+        }
+      },
+      "title": "PluginEntry",
+      "type": "object"
+    },
     "PredicateCheck": {
       "description": "A registered Python check over the workspace or the run.",
       "properties": {
@@ -406,6 +484,45 @@
         "name"
       ],
       "title": "PredicateCheck",
+      "type": "object"
+    },
+    "RemoteMcpServer": {
+      "additionalProperties": false,
+      "description": "OpenCode 1.18's remote MCP server. The worker sends it with ``oauth: false``.",
+      "properties": {
+        "enabled": {
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "headers": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Headers",
+          "type": "object"
+        },
+        "timeout": {
+          "description": "milliseconds",
+          "exclusiveMinimum": 0,
+          "title": "Timeout",
+          "type": "integer"
+        },
+        "type": {
+          "const": "remote",
+          "title": "Type",
+          "type": "string"
+        },
+        "url": {
+          "pattern": "^https?://\\S+$",
+          "title": "Url",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "url"
+      ],
+      "title": "RemoteMcpServer",
       "type": "object"
     },
     "Requirement": {
@@ -450,7 +567,7 @@
           "title": "Image"
         },
         "memory": {
-          "default": "8Gi",
+          "default": "4Gi",
           "pattern": "^\\d+(Mi|Gi)$",
           "title": "Memory",
           "type": "string"
@@ -612,6 +729,29 @@
       "title": "Key",
       "type": "string"
     },
+    "mcp": {
+      "patternProperties": {
+        "^[a-z][a-z0-9-]{0,62}$": {
+          "discriminator": {
+            "mapping": {
+              "local": "#/$defs/LocalMcpServer",
+              "remote": "#/$defs/RemoteMcpServer"
+            },
+            "propertyName": "type"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/LocalMcpServer"
+            },
+            {
+              "$ref": "#/$defs/RemoteMcpServer"
+            }
+          ]
+        }
+      },
+      "title": "Mcp",
+      "type": "object"
+    },
     "model": {
       "$ref": "#/$defs/ModelPolicy"
     },
@@ -647,11 +787,20 @@
       "default": null,
       "title": "Permissions"
     },
+    "plugins": {
+      "items": {
+        "$ref": "#/$defs/PluginEntry"
+      },
+      "title": "Plugins",
+      "type": "array"
+    },
     "profile": {
       "default": "coder",
       "enum": [
         "coder",
-        "gate"
+        "gate",
+        "reviewer",
+        "planner"
       ],
       "title": "Profile",
       "type": "string"
