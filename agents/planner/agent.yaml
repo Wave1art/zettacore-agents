@@ -1,6 +1,6 @@
 key: planner
 version: 1.0.0
-requires_engine: ">=2.0.0-rc.59"
+requires_engine: ">=2.0.0-rc.60"
 description: Plans one item through its planning item (Zettacore ADR 0055) — a feature into tracer-bullet phases and its workspace, an initiative into decisions and features, a task or a bug into what it needs — and ends with a plan summary for a person to accept or send back. Writes items and item inputs in the engine, never code.
 runtime: opencode
 profile: planner
