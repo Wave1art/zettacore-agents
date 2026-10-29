@@ -25,7 +25,7 @@ own environment (Zettacore ADR 0051) and requires `2.0.0-rc.48`; an older engine
 the verdict as its `result`, as every agent finishes, instead of an answer file, and requires
 `2.0.0-rc.49`; an older engine following `latest` stays on `v2.0.0`. `v2.2.0` adds `planner`
 1.0.0, the planning agent of Zettacore ADR 0055 (`profile: planner`), which requires
-`2.0.0-rc.58`; an older engine following `latest` stays on `v2.1.0`. Its schema copy is
+`2.0.0-rc.59`; an older engine following `latest` stays on `v2.1.0`. Its schema copy is
 regenerated, which also adds `profile: reviewer`, missing from the copy since `v2.0.0`.
 
 ## Layout
