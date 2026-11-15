@@ -1,0 +1,16 @@
+key: contract-reviewer
+version: 1.0.0
+requires_engine: ">=2.0.0-rc.66"
+description: Reviews a proposed change to a repository's verification contract (verify.sh and the dev container, Zettacore ADR 0061) and answers approve or refuse with a reason, which the worker records with decide.
+runtime: llm-loop
+profile: gate
+model: {tier: frontier}
+states:
+  - name: decide
+    prompt: prompts/decide.md
+    time_budget: 10m
+    idle_timeout: 5m
+    max_attempts: 1
+remediation: false
+sandbox: {cpu: "1", memory: 1Gi, dockerd: false}
+timeouts: {idle: 10m, gate: 10m, bootstrap: 1m}
