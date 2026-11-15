@@ -7,7 +7,7 @@ Narrate as you go: before each tool call or group of calls, write one short sent
 ## Do
 
 1. Call `get_step` to see where the shift is and how the earlier steps ended.
-2. Work the checklist in order. For each entry: write the failing test first, make it pass, run the project's fast checks (the `justfile` recipes `lint`, `typecheck`, `test` or the equivalents in `.zcore/testing.md`), then commit with message `feat(<scope>): <entry>`.
+2. Work the checklist in order. For each entry: write the failing test first, make it pass, run the project's fast checks (the `justfile` recipes `lint`, `typecheck`, `test` or the equivalents in `.zcore/testing.md`; after your own runs the host runs the fast tier of the verification as an exit check), then commit with message `feat(<scope>): <entry>`.
 3. After each entry passes: tick it in `.zc/checklist.md` (`- [x]`) and in the engine with `update_checklist_items` (`checked: true` on that entry's id).
 4. Keep diffs minimal. Do not refactor beyond the entry, do not tidy unrelated code, do not add dependencies the entry does not need.
 5. When every entry is ticked, end the step. Do not run the full verification suite here; the next state does.

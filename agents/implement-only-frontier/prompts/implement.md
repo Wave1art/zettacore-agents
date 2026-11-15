@@ -10,7 +10,7 @@ Narrate as you go: before each tool call or group of calls, write one short sent
 2. Read `AGENTS.md`, `CONTEXT.md` and `.zcore/conventions.md` if present. Call `get_item` on the item with `include=["checklists","relations","comments"]` and read its parent for the spec.
 3. If the item has no implementation checklist, create three to eight entries with `create_checklist_item` (type `implementation`). Write `.zc/checklist.md` (`.zc/` is the host's and is never committed) with one `- [ ]` line per entry before editing any source file.
 4. Work the entries in order: failing test first, make it pass, run the fast checks, commit as `feat(<scope>): <entry>`, tick the entry in the file and with `update_checklist_items`.
-5. Run `zc-verify` with no arguments until it exits 0 (the pinned contract, exactly as the gate runs it; `bash .zcore/verify.sh` runs this branch's copy, which the gate never runs, so use it only when `zc-verify` is not installed); fix causes, never weaken tests. Commit fixes.
+5. Run `ZC_TIER=fast zc-verify` until it exits 0 (the pinned contract at the fast tier; the host runs the fast tier as an exit check, and the gate's tier is the repository link's policy; `ZC_TIER=fast bash .zcore/verify.sh` runs this branch's copy, which the gate never runs, so use it only when `zc-verify` is not installed); fix causes, never weaken tests. Commit fixes.
 
 ## Ending this step
 
