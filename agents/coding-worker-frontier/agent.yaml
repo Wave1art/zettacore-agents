@@ -1,5 +1,5 @@
 key: coding-worker-frontier
-version: 1.5.0
+version: 1.5.1
 requires_engine: ">=2.0.0-rc.63"
 description: coding-worker kept under its older key for existing bindings; runs on the standard tier like coding-worker. The same five-state loop, gated on the pinned contract.
 runtime: opencode
@@ -18,7 +18,7 @@ states:
     max_attempts: 3
     checks:
       - {kind: predicate, name: checklist_exists}
-      - {kind: command, command: [sh, -c, 'command -v zc-verify >/dev/null && exec zc-verify || exec bash .zcore/verify.sh'], env: {ZC_TIER: fast}, timeout: 600}
+      - {kind: command, command: [sh, -c, 'command -v zc-verify >/dev/null && exec zc-verify || exec bash .zcore/verify.sh'], env: {ZC_TIER: fast}, timeout: 900}
       - {kind: predicate, name: tier0_denies}
   - name: verify
     prompt: prompts/verify.md

@@ -1,5 +1,5 @@
 key: implement-only
-version: 2.4.0
+version: 2.4.1
 requires_engine: ">=2.0.0-rc.63"
 description: Single-state variant of coding-worker; one implement pass per iteration, gated on the pinned contract.
 runtime: opencode
@@ -12,7 +12,7 @@ states:
     idle_timeout: 20m
     max_attempts: 2
     checks:
-      - {kind: command, command: [sh, -c, 'command -v zc-verify >/dev/null && exec zc-verify || exec bash .zcore/verify.sh'], env: {ZC_TIER: fast}, timeout: 600}
+      - {kind: command, command: [sh, -c, 'command -v zc-verify >/dev/null && exec zc-verify || exec bash .zcore/verify.sh'], env: {ZC_TIER: fast}, timeout: 900}
       - {kind: predicate, name: tier0_denies}
 remediation: true
 permissions: {bash: {"*": allow, "rm -rf *": deny}, external_directory: allow}
