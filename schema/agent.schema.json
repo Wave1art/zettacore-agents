@@ -28,6 +28,16 @@
           "title": "Command",
           "type": "array"
         },
+        "env": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "propertyNames": {
+            "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+          },
+          "title": "Env",
+          "type": "object"
+        },
         "kind": {
           "const": "command",
           "default": "command",
