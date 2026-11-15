@@ -44,7 +44,7 @@ failing test, add the stage without the bypass).
 Answer with the JSON object only:
 
 ```json
-{"decision": "approve", "reason": "..."}
+{"decision": "refuse", "reason": "verify.sh: the lint stage now ends in `|| true`, so lint errors no longer fail the gate; fix the lint errors instead."}
 ```
 
 `decision` is `approve` or `refuse`. Any other answer counts as a refusal.
