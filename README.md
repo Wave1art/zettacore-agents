@@ -27,6 +27,11 @@ the verdict as its `result`, as every agent finishes, instead of an answer file,
 1.0.0, the planning agent of Zettacore ADR 0055 (`profile: planner`), which requires
 `2.0.0-rc.60`; an older engine following `latest` stays on `v2.1.0`. Its schema copy is
 regenerated, which also adds `profile: reviewer`, missing from the copy since `v2.0.0`.
+`v3.0.0` removes `coding-worker-attended`, `coding-worker-frontier`, `implement-only` and
+`implement-only-frontier`, which Zettacore ADR 0060 retires (engine `2.0.0-rc.67`): a project
+agent naming one of them is an instance of `coding-worker`, attended for
+`coding-worker-attended`. An engine keeps the versions it registered, so a source that no longer
+ships a key leaves its definition registered.
 
 ## Layout
 
@@ -47,7 +52,7 @@ from a Zettacore clone: `uv run zc agents validate /path/to/zettacore-agents/age
 ## The agents
 
 Every definition names its model as a tier: the LiteLLM model group `zc/<tier>` the install
-serves (`zc/standard` for every definition except `reviewer` and `planner`, which name `zc/frontier`; every coding definition, the two `-frontier` keys included, runs on `zc/standard`; ADR 0008). A definition names one tier: fallbacks between models are LiteLLM's routing (ADR 0004), not part of the definition. The starter set needs only `zc/standard` and `zc/frontier`; none names `zc/cheap`. `profile: coder` may push to the item's
+serves (`zc/standard` for every definition except `reviewer` and `planner`, which name `zc/frontier`; every coding definition runs on `zc/standard`; ADR 0008). A definition names one tier: fallbacks between models are LiteLLM's routing (ADR 0004), not part of the definition. The starter set needs only `zc/standard` and `zc/frontier`; none names `zc/cheap`. `profile: coder` may push to the item's
 branch; `profile: gate` never pushes; `profile: planner` writes items and item-scope inputs
 under the item it plans and never pushes (its token is minted only for a definition declaring
 it, enabled by the project's owner). A project enables a definition on a Temporal task queue
@@ -57,10 +62,6 @@ routes items to that queue or to the definition by name.
 | Key | Purpose | Runtime / profile | Serves | Tier (`zc/<tier>`) | Sandbox and runtime notes |
 |---|---|---|---|---|---|
 | `coding-worker` | Implements one phase through the five-state loop `resolve, implement, verify, review, handoff`: decides what to build from the item and its spec, builds it against `.zc/checklist.md`, runs the pinned verification contract with `zc-verify` as the gate does, reviews the diff as a senior colleague would, then closes the item for the host push and gate. One remediation pass after a red gate. | `opencode`, `coder`, unattended | `phase` items (allocation `queue:shift-coding`) on the queue it is enabled on, `shift-coding` by default | `standard` | 1 CPU, 2 GiB, `dockerd: true` (compose-based test suites); exit checks: `checklist_exists` after implement, `zc-verify` after verify (`bash .zcore/verify.sh` where the sandbox has no `zc-verify`), checklist complete after handoff; idle 20 m, gate 10 m, bootstrap 2 m |
-| `coding-worker-frontier` | `coding-worker` kept under its older key for existing bindings: the same five-state loop, prompts and checks, now on the standard tier. | `opencode`, `coder`, unattended | `phase` items (allocation `queue:shift-coding`) on the queue it is enabled on | `standard` | As `coding-worker` |
-| `coding-worker-attended` | The same five-state loop, but `interaction: attended`: every OpenCode permission prompt becomes a `question` in the inbox and the shift waits for the answer instead of allowing it once. | `opencode`, `coder`, attended | `phase` items, on its own queue (one definition per queue) | `standard` | As `coding-worker`; the open question holds the idle clock |
-| `implement-only` | Single-state variant of `coding-worker`: plan, build, verify and close in one `implement` pass per iteration, gated on the pinned contract. The cheapest way to run a well-specified phase. | `opencode`, `coder`, unattended | `phase` items on the queue it is enabled on | `standard` | 1 CPU, 2 GiB, `dockerd: true`; one 60 m state, two attempts; idle 20 m, gate 10 m |
-| `implement-only-frontier` | `implement-only` kept under its older key for existing bindings: the same single `implement` pass, now on the standard tier. | `opencode`, `coder`, unattended | `phase` items on the queue it is enabled on | `standard` | As `implement-only` |
 | `bug-fixer` | Diagnoses one defect from the bug's `brief` and `repro` fields, reproduces it with a failing regression test, fixes the cause (not the symptom) and closes the item, gated on the pinned contract. | `opencode`, `coder`, unattended | `bug` items (allocation `agent:bug-fixer`) | `standard` | 1 CPU, 2 GiB, `dockerd: true`; one 60 m state, two attempts; idle 20 m, gate 10 m |
 | `reviewer` | Reviews a change as an agent in the change's own environment (Zettacore ADR 0051), spec then standards in one sandbox, by the criteria of the attended `/zc:review` skill: `spec` (each acceptance criterion met, partly met, missing or cannot verify, with file:line evidence or a probe it ran; the Spec's requirements and Standing invariants; `reversibility` and `blast_radius` confirmed or challenged) and `standards` (every changed file against the project's conventions, lessons, style guides and `CONTEXT.md` vocabulary, each finding citing its rule; Minimal Impact, Simplicity First, No Laziness; the implementer's refactoring candidates re-checked). Reads a brief of every changed file, the Spec and the green gate, opens and runs what it needs, and ends with `end_step` carrying its verdict for the workflow to record. | `opencode`, `reviewer` | `review` items (allocation `agent:reviewer`) on queue `shift-review`; one `ReviewWorkflow` per round, checked out at the green gate's commit, with no push | `frontier` | The reviewed item's environment and dev stack (its own `sandbox` only without one); 45 m per axis, one attempt |
 | `planner` | Plans one item through its planning item (Zettacore ADR 0055) in three states: `survey` reads the planning item's brief and any send-back, the target, the work types (`list_work_types`), the repositories and the workspace; `plan` drafts and checks the plan, then writes it: a feature's tracer-bullet phases with plans, checklists, risk fields and `precedes` relations (the substance of `/zc:spec-to-tickets`), an initiative's first ring of decisions and its features (`/zc:scope`), a task's or a bug's body, checklists and fields, and the item-scope workspace inputs the work needs (`declare_workspace_input`, credentials named, never held); `check` runs the readiness check and ends with `end_step` `NO_MORE_TASKS` carrying the `## Plan summary` (items and dependencies, coverage, workspace, missing credentials with their console links, open questions, verdict), which becomes the planning item's closing comment for a person to accept or send back. Never readies, starts, claims or deletes, never sets a start mode, never declares at repository or project scope, never calls `request_access`. Its skills (`skills/`) hold the substance; the prompts stay short. | `opencode`, `planner`, unattended | `planning` items (allocation `queue:planning`), created by Plan this or `plan_item`; the project's `planning` work queue is created with it as the default when an owner enables it | `frontier` | The worker's planner image (`ZC_PLANNER_IMAGE`, chosen by the profile; no `sandbox.image`): the target's repository cloned, every other repository of the project read-only under `~/repos/<owner>/<repo>`, no push credential; 1 CPU, 2 GiB, no dockerd; no remediation, no gate; `edit`, `webfetch` and `websearch` denied; 15 m survey, 40 m plan, 15 m check, two attempts each |
@@ -69,6 +70,11 @@ routes items to that queue or to the definition by name.
 The OpenCode coding definitions share `prompts/remediation.md` (one corrective pass after a red
 gate), and every OpenCode definition the permission map `bash: {"*": allow, "rm -rf *": deny}`. Every prompt stays around 400
 words.
+
+Attended and unattended work, and a tier other than the definition's, are settings of a project's
+agent instance, not definitions of their own (Zettacore ADR 0060): an instance of `coding-worker`
+with `interaction: attended` turns every OpenCode permission prompt into a `question` in the
+inbox, and the shift waits for the answer instead of allowing it once.
 
 ### How an OpenCode agent talks to its shift
 
