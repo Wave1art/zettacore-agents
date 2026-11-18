@@ -27,6 +27,9 @@ the verdict as its `result`, as every agent finishes, instead of an answer file,
 1.0.0, the planning agent of Zettacore ADR 0055 (`profile: planner`), which requires
 `2.0.0-rc.60`; an older engine following `latest` stays on `v2.1.0`. Its schema copy is
 regenerated, which also adds `profile: reviewer`, missing from the copy since `v2.0.0`.
+`v2.4.0` adds `contract-reviewer` 1.0.0, the contract reviewer of Zettacore ADR 0061, which
+requires `2.0.0-rc.67`, the first engine with the contract change flow; an older engine
+following `latest` stays on `v2.3.1`.
 
 ## Layout
 

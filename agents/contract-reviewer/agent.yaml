@@ -1,6 +1,6 @@
 key: contract-reviewer
 version: 1.0.0
-requires_engine: ">=2.0.0-rc.66"
+requires_engine: ">=2.0.0-rc.67"
 description: Reviews a proposed change to a repository's verification contract (verify.sh and the dev container, Zettacore ADR 0061) and answers approve or refuse with a reason, which the worker records with decide.
 runtime: llm-loop
 profile: gate
